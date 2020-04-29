@@ -34,7 +34,13 @@ trigger source icons ("AU" for auto triggering, "LN" for line triggering)
 that are not associated with a vertical channel.
 
 - "Trig level" is a dashed line that can be optionally drawn across the display
-at the selected trigger point.
+at the selected trigger point. (Suggested dashed-line implementation: 555
+timer, astable, reset line driven by sweep gate. This will reset it on every
+sweep so the dashes line up)
+
+All vertical channels should emit a space (0x3F, no lines asserted) for
+position 0. The trigger module will insert trigger level symbols on the
+relevant channel during the scan sequence.
 
 ## Character encoding
 
