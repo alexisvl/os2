@@ -94,15 +94,18 @@ The OS-2 character encoding is six bits wide, and is defined as follows:
 | 0x2B  | k         |
 | 0x2C  | m         |
 | 0x2D  | µ         |
-| 0x2E  | Ω         |
-| 0x2F  | s         |
-| 0x30  | alert sign |
-| 0x31  | rising edge |
-| 0x32  | falling edge |
-| 0x33  | both edges |
-| 0x34  | LN (a la BW, for "LINE") |
-| 0x35  | AU (a la BW, for "AUTO") |
-| 0x36  | /         |
+| 0x2E  | n         |
+| 0x2F  | p         |
+| 0x30  | Ω         |
+| 0x31  | s         |
+| 0x32  | alert sign |
+| 0x33  | rising edge |
+| 0x34  | falling edge |
+| 0x35  | both edges |
+| 0x36  | LN (a la BW, for "LINE") |
+| 0x37  | AU (a la BW, for "AUTO") |
+| 0x38  | /         |
+| 0x3E  | ♥         |
 | 0x3F  | space     |
 
-Codepoints `0x37` through `0x3E` are unspecified.
+Codepoints `0x39` through `0x3E` are unspecified.
