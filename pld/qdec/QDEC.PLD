@@ -1,0 +1,81 @@
+Name     Qdec ;
+PartNo   00 ;
+Date     4/30/20 ;
+Revision 01 ;
+Designer Engineer ;
+Company  Alexis ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* PLD add-on for a 74HC163 to make a quadrature encoder controller. */
+
+/* *************** INPUT PINS *********************/
+PIN 1 = CLK;                /* Clock input */
+PIN 2 = QA;                 /* Quadrature input A */
+PIN 3 = QB;                 /* Quadrature input B */
+PIN [4..7] = [TOP0..3];     /* Strap to top of count */
+PIN [8..11] = [Q0..3];      /* '191: Qa-Qd outputs */
+PIN 13 = WRAP;              /* Strap high to allow wrapping */
+
+/* *************** OUTPUT PINS *********************/
+PIN 23 = QAp;               /* Internal signal: previous QA */
+PIN 22 = QBp;               /* Internal signal: previous QB */
+PIN 21 = !CTEN;             /* '191: !CTEN input (count enable) */
+PIN 20 = D_nU;              /* '191: D_nU input (count direction) */
+PIN 17 = !LOAD;             /* '191: !LOAD input (async load) */
+PIN 16 = !FORCE_LOW;        /* '191: force-low (see "Preset Inputs" below) */
+
+PIN 18 = CHANGE;            /* Output: pulse on value change */
+PIN 14 = AT_BOTTOM;         /* Output: indicates currently at bottom (Q == 0) */
+PIN 15 = AT_TOP;            /* Output: indicates currently at top (Q == TOP) */
+
+/* PRESET INPUTS:
+ * In order to implement wrapping, control over the '191 async preload is needed,
+ * with both load-to-zero and load-to-top:
+ *   - Bits that are 0 in TOP can be strapped to ground.
+ *   - Bits that are 1 in TOP should be strapped together and to FORCE_LOW.
+ */
+
+QAp.ar = 'b'0;
+QAp.sp = 'b'0;
+QBp.ar = 'b'0;
+QBp.sp = 'b'0;
+
+QAp.D = QA;
+QBp.D = QB;
+
+
+QUAD_UP = (
+	(!QA & !QB & !QAp & QBp)
+	# (!QA & QB & QAp & QBp)
+	# (QA & QB & QAp & !QBp)
+	# (QA & !QB & !QAp & !QBp)
+);
+
+QUAD_DOWN = (
+	(!QA & !QB & QAp & !QBp)
+	# (!QA & QB & !QAp & !QBp)
+	# (QA & QB & !QAp & QBp)
+	# (QA & !QB & QAp & QBp)
+);
+
+field count = [Q3..0];
+field top = [TOP3..0];
+
+AT_TOP = !((Q3 $ TOP3) # (Q2 $ TOP2) # (Q1 $ TOP1) # (Q0 $ TOP0));
+AT_BOTTOM = !(Q3 # Q2 # Q1 # Q0);
+
+UP_ALLOWED = !AT_TOP;
+DOWN_ALLOWED = !AT_BOTTOM;
+
+UP = QUAD_UP & UP_ALLOWED;
+DOWN = QUAD_DOWN & DOWN_ALLOWED;
+
+LOAD = (QUAD_UP & AT_TOP & WRAP) # (QUAD_DOWN & AT_BOTTOM & WRAP);
+FORCE_LOW = LOAD & AT_TOP;
+
+CTEN = UP # DOWN;
+
+CHANGE = CTEN # LOAD;
+D_nU = DOWN;

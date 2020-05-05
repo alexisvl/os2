@@ -1,9 +1,12 @@
+__pycache__
+
 # Ignore list for: kicad
 *.bck
 *-cache.lib
 *.kicad_pcb-bak
 *.sch-bak
 *-cache
+*.kicad_sch-bak
 
 # Ignore list for: tex
 *.aux

@@ -38,11 +38,13 @@ should not drive the CHARn lines.
 ## Signal interfaces
 
 The signal interface is a differential current-sink interface. It is biased to
-a common-mode voltage by the receiver and terminated into 120 ohms differential.
+a common-mode voltage by the receiver and terminated into 160 ohms differential.
 
 Signal level is 0.5V per division, with the center of the display at (ideally)
 0V. Because the display measures 10 divisions by 8 divisions, the voltage to
-reach the display edges is ±2.5V (horizontally) or ±2.0V (vertically).
+reach the display edges is ±2.5V (horizontally) or ±2.0V (vertically), or
+±16.6mA (horizontally) or ±13.3mA (vertically) current-mode. Common-mode sink
+current may be up to 30mA.
 
 Common-mode termination voltages vary to simplify circuit implementation. They
 are as follows:
@@ -53,6 +55,41 @@ are as follows:
 - Primary horizontal signals SIG, TSIG terminate into +9V, allowing them to
     be easily developed from the prior +4.5V signals.
 - Display switch output SIG terminates into +9V.
+
+An example termination circuit and transmitter for 16.6mApp. To use at 13.3mApp
+with the same input voltage, change the 120 ohm gain resistor to 180 ohms. Gain
+values are approximate; for applications requiring accurate gain a gain trimpot
+is suggested.
+
+```
+                   |       |
+                   C       C
+Vcm + 0.65V ------B-------B
+                   E       E
+                   |       |
+        Vcm --[68]-+       +-[68]-- Vcm
+                   |       |      
+                   |       |
+                   |       |
+                   |       |
+                   .inputs .
+                   .       .
+                   backplane   
+                   .       .
+                   .outputs.
+                   |       |
+                   +-[150]-+
+                   |       |
+                   C       C
+single:  2Vpp ----B         B---- gnd
+diff:    1Vpp      E       E      1Vpp 180°
+                   |       |
+                   +-[120]-+
+                   |       |
+                 [1 k]   [1 k]
+                   |       |
+                 -15V    -15V
+```
 
 ### Vertical module
 

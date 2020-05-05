@@ -12,7 +12,7 @@ VERT1   VERT2   VERT3   VERT4
 >------- trig  level -------<
 
 
-DESC1DESC2              HORIZ
+DESC1DESC2DESC3         HORIZ
 ```
 
 All text fields are eight spaces long.
@@ -25,7 +25,7 @@ trigger indicators, an ohm sign for 50-ohm termination, an alert sign
 for termination overheat or other critical conditions, and a transient
 "IDENT" indication when a probe identifier is activated).
 
-- `DESC1` and `DESC2` are arranged so they flow together into a single field,
+- `DESC1` to `DESC3` are arranged so they flow together into a single field,
 and exist so that an optional captioning plugin may be used to write user-
 specified labels onto the display.
 
@@ -61,51 +61,54 @@ The OS-2 character encoding is six bits wide, and is defined as follows:
 | 0x0A  | .         |
 | 0x0B  | <         |
 | 0x0C  | >         |
-| 0x0D  | -         |
-| 0x0E  | ∿ (sine wave) |
-| 0x0F  | ground symbol |
-| 0x10  | BW (Tek style, combined single width) |
-| 0x11  | A         |
-| 0x12  | B         |
-| 0x13  | C         |
-| 0x14  | D         |
-| 0x15  | E         |
-| 0x16  | F         |
-| 0x17  | G         |
-| 0x18  | H         |
-| 0x19  | I         |
-| 0x1A  | J         |
-| 0x1B  | K         |
-| 0x1C  | L         |
-| 0x1D  | M         |
-| 0x1E  | N         |
-| 0x1F  | O         |
-| 0x20  | P         |
-| 0x21  | Q         |
-| 0x22  | R         |
-| 0x23  | S         |
-| 0x24  | T         |
-| 0x25  | U         |
-| 0x26  | V         |
-| 0x27  | W         |
-| 0x28  | X         |
-| 0x29  | Y         |
-| 0x2A  | Z         |
-| 0x2B  | k         |
-| 0x2C  | m         |
-| 0x2D  | µ         |
-| 0x2E  | n         |
-| 0x2F  | p         |
-| 0x30  | Ω         |
-| 0x31  | s         |
-| 0x32  | alert sign |
-| 0x33  | rising edge |
-| 0x34  | falling edge |
-| 0x35  | both edges |
-| 0x36  | LN (a la BW, for "LINE") |
-| 0x37  | AU (a la BW, for "AUTO") |
-| 0x38  | /         |
-| 0x3E  | ♥         |
+| 0x0D  | /         |
+| 0x0E  | -         |
+| 0x0F  | +         |
+| 0x10  | ∿ (sine wave) |
+| 0x11  | Ω         |
+| 0x12  | ground symbol |
+| 0x13  | BW (Tek style, combined single width) |
+| 0x14  | LN (a la BW, for "LINE") |
+| 0x15  | AU (a la BW, for "AUTO") |
+| 0x16  | rising edge |
+| 0x17  | falling edge |
+| 0x18  | both edges |
+| 0x19  | alert sign |
+| 0x1A  | A         |
+| 0x1B  | B         |
+| 0x1C  | C         |
+| 0x1D  | D         |
+| 0x1E  | E         |
+| 0x1F  | F         |
+| 0x20  | G         |
+| 0x21  | H         |
+| 0x22  | I         |
+| 0x23  | J         |
+| 0x24  | K         |
+| 0x25  | L         |
+| 0x26  | M         |
+| 0x27  | N         |
+| 0x28  | O         |
+| 0x29  | P         |
+| 0x2A  | Q         |
+| 0x2B  | R         |
+| 0x2C  | S         |
+| 0x2D  | T         |
+| 0x2E  | U         |
+| 0x2F  | V         |
+| 0x30  | W         |
+| 0x31  | X         |
+| 0x32  | Y         |
+| 0x33  | Z         |
+| 0x34  | k         |
+| 0x35  | m         |
+| 0x36  | µ         |
+| 0x37  | n         |
+| 0x38  | p         |
+| 0x39  | s         |
+| 0x3A  | °         |
+| 0x3B  | ?         |
+| 0x3C  | ♥         |
+| 0x3D  | dither block |
+| 0x3E  | full block |
 | 0x3F  | space     |
-
-Codepoints `0x39` through `0x3E` are unspecified.
