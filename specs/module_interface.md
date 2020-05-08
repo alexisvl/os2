@@ -30,10 +30,17 @@ implement the on-screen display:
 | SELECT        | to mod    | Asserts when module should drive CHARn           |
 | POS0 – POS2   | to mod    | Selects a character position (0-7)               |
 | CHAR0 – CHAR5 | from mod  | Open coll; drives character bits on SELECT       |
+| OSDINTEN      | from mod  | Open coll active low; intensifies character      |
+| OSDINVERSE    | from mod  | Open coll active low; inverse video              |
 
-This is an asynchronous interface, and modules should respond as quickly as
-possible to changes in the input lines. When SELECT is not asserted, the module
-should not drive the CHARn lines.
+From the moment SELECT or POSn changes, a module has 10µs to respond with the
+next character code. When SELECT is not asserted, the module should not drive
+the CHARn lines.
+
+Because the OSD interface prefetches one character ahead of the display module,
+the normal INTEN signal cannot be used to intensify the character being
+requested. Use OSDINTEN (and OSDINVERSE) instead; these are latched for use
+in the next cycle.
 
 ## Signal interfaces
 
@@ -111,6 +118,7 @@ Trigger signals are buffered duplicates of the primary signals.
 | TSIG+     | from mod  | Trigger signal, +ve           | Differential, +4.5Vcm     |
 | TSIG-     | from mod  | Trigger signal, -ve           | Differential, +4.5Vcm     |
 | INTEN     | from mod  | Logic, assert to intensify    | Open-coll active low 5V   |
+| BLANK     | from mod  | Logic, assert to blank        | Open-cool active low 5V   |
 | ACTIVE    | to mod    | Asserts when displaying       | 5V CMOS                   |
 
 ACTIVE is asserted by the display sequencer whenever this module's output is

@@ -1,4 +1,4 @@
-update=Mon 04 May 2020 08:48:41 PM MDT
+update=Fri 08 May 2020 08:12:27 AM MDT
 version=1
 last_client=kicad
 [general]
@@ -32,10 +32,6 @@ NetIExt=net
 version=1
 LibDir=
 [eeschema/libraries]
-[SchematicFrame]
-version=1
-[LibeditFrame]
-version=1
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
@@ -58,5 +54,9 @@ ERC_CheckBusDriverConflicts=1
 ERC_CheckBusEntryConflicts=1
 ERC_CheckBusToBusConflicts=1
 ERC_CheckBusToNetConflicts=1
+[SchematicFrame]
+version=1
 [sheetnames]
-1=265900ab-20ab-4850-aa8d-abd23333f2f7:
+1=69cb1580-f146-4bbd-a077-3b3a11a80c70:
+[LibeditFrame]
+version=1
