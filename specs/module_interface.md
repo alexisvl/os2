@@ -27,20 +27,18 @@ implement the on-screen display:
 
 | Pin           | Direction | Function                                         |
 |---------------|-----------|--------------------------------------------------|
-| SELECT        | to mod    | Asserts when module should drive CHARn           |
+| FIELDSELECT   | to mod    | Asserts when module should drive CHARn           |
 | POS0 – POS2   | to mod    | Selects a character position (0-7)               |
-| CHAR0 – CHAR5 | from mod  | Open coll; drives character bits on SELECT       |
-| OSDINTEN      | from mod  | Open coll active low; intensifies character      |
-| OSDINVERSE    | from mod  | Open coll active low; inverse video              |
+| CHAR0 – CHAR6 | from mod  | Open coll; drives character bits on SELECT       |
+| CHARINTEN     | from mod  | Open coll active low; intensifies character      |
 
-From the moment SELECT or POSn changes, a module has 10µs to respond with the
-next character code. When SELECT is not asserted, the module should not drive
-the CHARn lines.
+From the moment FIELDSELECT or POSn changes, a module has 10µs to respond with
+the next character code. When FIELDSELECT is not asserted, the module should not
+drive the CHARn lines.
 
 Because the OSD interface prefetches one character ahead of the display module,
 the normal INTEN signal cannot be used to intensify the character being
-requested. Use OSDINTEN (and OSDINVERSE) instead; these are latched for use
-in the next cycle.
+requested. Use CHARINTEN instead; this is latched for use in the next cycle.
 
 ## Signal interfaces
 
@@ -307,11 +305,11 @@ The same pinout is allocated different variant IOs depending on the module.
 | C19       | g             | B19       | SA8           | A19       | SA9           |
 | C20       | SA10          | B20       | g             | A20       | SA11          |
 | C21       | SA12          | B21       | SA13          | A21       | SA14          |
-| C22       | SA15          | B22       | g             | A22       | g             |
-| C23       | CHAR2         | B23       | CHAR1         | A23       | CHAR0         |
-| C24       | CHAR5         | B24       | CHAR4         | A24       | CHAR3         |
+| C22       | SA15          | B22       | CHAR0         | A22       | CHAR1         |
+| C23       | CHAR2         | B23       | CHAR3         | A23       | CHAR4         |
+| C24       | CHAR5         | B24       | CHAR6         | A24       | CHARINTEN     |
 | C25       | POS0          | B25       | POS1          | A25       | POS2          |
-| C26       | g             | B26       | g             | A26       | +24V          |
+| C26       | FIELDSELECT   | B26       | g             | A26       | +24V          |
 | C27       | g             | B27       | +55V          | A27       | +24V          |
 | C28       | g             | B28       | +15V          | A28       | +12V          |
 | C29       | +10.00V       | B29       | g             | A29       | +12V          |
@@ -321,8 +319,7 @@ The same pinout is allocated different variant IOs depending on the module.
 
 - SSn lines are "sweep synchronous". They are located in places where toggling
 during a sweep could impose noise on the display, so they should only toggle
-between sweeps. Example signals to allocate here are SWEEP, DONE, SELECT (for
-OSD).
+between sweeps. Example signals to allocate here are SWEEP, DONE.
 
 - SAn lines are "sweep asynchronous". They are separated well from the analog
 signal pins, and may toggle during sweep. These are generally used for all logic

@@ -76,26 +76,29 @@ class Eeplut:
         inputs_map = self.inputs_map()
         outputs_map = self.outputs_map()
 
-        data = [0] * self.address_space
+        data = [0xFF] * self.address_space
 
         for addr in range(self.address_space):
             inputs = {}
             for address_line in range(self.address_lines):
                 inputs[inputs_map.get(address_line, address_line)] = (
-                    bool(addr & (1 << address_line))
+                    int(bool(addr & (1 << address_line)))
                 )
 
-            # TODO: default value
-            outputs = {}
+            outputs = {
+                k: self.default_unused_output() for k in range(self.width_bits)
+            }
             for fun in logic_functions:
                 # TODO: weak/strong and validation
-                outputs.update(fun(inputs))
+                fun_outputs = fun(inputs)
+                for k, v in fun_outputs.items():
+                    kn = outputs_map.get(k, k)
+                    if not isinstance(kn, int):
+                        raise ValueError(f"Could not map output {k}")
+                    outputs[kn] = bool(v)
 
             data_value = 0
             for k, v in outputs.items():
-                k = outputs_map.get(k, k)
-                if not isinstance(k, int):
-                    raise ValueError(f"Could not map output {k}")
                 if v:
                     data_value |= (1 << k)
             data[addr] = data_value
@@ -155,7 +158,7 @@ class Eeplut:
         """Override to define the default logic level for outputs present on the
         chip that are not defined.
         """
-        return False
+        return True
 
 def auto(classname, *args, **kwargs):
     """Call with the name of a class to run an automatic conversion if running
