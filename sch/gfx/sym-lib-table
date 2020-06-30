@@ -15,4 +15,5 @@
   (lib (name "Memory_ROM")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/Memory_ROM.lib")(options "")(descr ""))
   (lib (name "Amplifier_Operational")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/Amplifier_Operational.lib")(options "")(descr ""))
   (lib (name "Oscillator")(type "Legacy")(uri "${KICAD_SYMBOL_DIR}/Oscillator.lib")(options "")(descr ""))
+  (lib (name "AltConnector")(type "KiCad")(uri "/home/alex/git/kicad-alt-libs/AltConnector.kicad_sym")(options "")(descr ""))
 )

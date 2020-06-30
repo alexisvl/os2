@@ -1,0 +1,98 @@
+
+(rules PCB gfx
+  (snap_angle 
+    fortyfive_degree
+  )
+  (autoroute_settings
+    (fanout off)
+    (eu.mihosoft.freerouting.autoroute on)
+    (postroute on)
+    (vias on)
+    (via_costs 50)
+    (plane_via_costs 5)
+    (start_ripup_costs 100)
+    (start_pass_no 445)
+    (layer_rule F.Cu
+      (active on)
+      (preferred_direction horizontal)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 2.6)
+    )
+    (layer_rule B.Cu
+      (active on)
+      (preferred_direction vertical)
+      (preferred_direction_trace_costs 1.0)
+      (against_preferred_direction_trace_costs 1.6)
+    )
+  )
+  (rule
+    (width 250.0)
+    (clear 200.2)
+    (clear 125.0 (type smd_to_turn_gap))
+    (clear 50.0 (type smd_smd))
+  )
+  (padstack "Via[0-1]_800:400_um"
+    (shape
+      (circle F.Cu 800.0 0.0 0.0)
+    )
+    (shape
+      (circle B.Cu 800.0 0.0 0.0)
+    )
+    (attach off)
+  )
+  (via 
+    "Via[0-1]_800:400_um" "Via[0-1]_800:400_um" default
+  )
+  (via 
+    "Via[0-1]_800:400_um-kicad_default" "Via[0-1]_800:400_um" "kicad_default"
+  )
+  (via_rule
+    default "Via[0-1]_800:400_um"
+  )
+  (via_rule
+    "kicad_default" "Via[0-1]_800:400_um-kicad_default"
+  )
+  (class default
+    (clearance_class default)
+    (via_rule default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+  (class "kicad_default"
+    gnd "Net-(C1-Pad2)" "Net-(C2-Pad2)" "Net-(C3-Pad2)" "Net-(C3-Pad1)" "Net-(C5-Pad2)" "Net-(C5-Pad1)" "Net-(D1-Pad2)"
+    "Net-(D1-Pad1)" A20 "Net-(Q2-Pad2)" C21 "Net-(Q3-Pad2)" "Net-(Q4-Pad1)" A2 "Net-(Q5-Pad1)"
+    A3 "Net-(Q5-Pad2)" "Net-(Q6-Pad1)" C2 "Net-(Q7-Pad1)" C3 "Net-(Q7-Pad2)" A5
+    /PREDONE /HDOT0 "Net-(R7-Pad1)" /HDOT1 /HDOT2 /POS0 "Net-(R11-Pad1)" /POS1
+    /POS2 "Net-(R16-Pad2)" "Net-(R17-Pad2)" "Net-(R18-Pad2)" "Net-(R19-Pad2)" "Net-(R19-Pad1)" "Net-(R20-Pad2)" "Net-(R20-Pad1)"
+    "Net-(R21-Pad2)" "Net-(R23-Pad2)" "Net-(R24-Pad2)" "Net-(R27-Pad2)" /DESCENDER0 /DESCENDER1 /LINE0 /LINE1
+    /LINE2 "Net-(R38-Pad2)" "Net-(R39-Pad2)" "Net-(R40-Pad2)" "Net-(R42-Pad2)" A24 B24 C24
+    A23 B23 C23 A22 B22 "Net-(Q1-Pad1)" CLK "Net-(U2-Pad6)"
+    "Net-(R4-Pad1)" "Net-(U2-Pad4)" "Net-(U2-Pad2)" RST# "Net-(U3-Pad7)" "Net-(U3-Pad13)" POR# POR
+    VCC "Net-(U4-Pad15)" ~RUN "Net-(U4-Pad14)" /LASTDOT /LASTFLD# "Net-(U5-Pad5)" /FLDREQ2
+    /POSREQ2 /FLDREQ1 /POSREQ1 /FLDREQ0 /POSREQ0 /LASTPOS# /~POR "Net-(U7-Pad7)"
+    "Net-(U7-Pad13)" "Net-(U7-Pad5)" "Net-(U7-Pad10)" "Net-(U7-Pad9)" "Net-(U8-Pad15)" RUN# RUN POSCLK
+    "Net-(U8-Pad3)" /DONE# "Net-(U8-Pad2)" A6 /DONEREQ "Net-(U9-Pad10)" "Net-(U11-Pad15)" /PREBLANK
+    "Net-(U10-Pad1)" "Net-(U12-Pad15)" "Net-(U10-Pad4)" "Net-(U12-Pad11)" "Net-(U13-Pad15)" "Net-(U10-Pad10)" "Net-(U10-Pad13)" "/INTERFIELD_BLANK"
+    /FLD2 /FLD1 /FLD0 C25 B25 A25 "Net-(U15-Pad15)" B21
+    A21 C22 "Net-(U15-Pad11)" /CHAR3 /CHAR6 /CHAR2 /CHAR5 /CHAR1
+    /CHAR4 /CHAR0 "Net-(U17-Pad15)" "Net-(U17-Pad11)" "/PIX_BLANK" "Net-(U18-Pad19)" "Net-(U18-Pad18)" "Net-(U18-Pad17)"
+    "Net-(U18-Pad16)" "Net-(U18-Pad15)" "Net-(U19-Pad1)" +5V GND +15V "-15V" A29
+    A28 B27 A27 A26 B19 A19 B18 A18
+    B17 B16 A16 A14 A13 B12 B11 A10
+    A9 B8 B7 C26 C6 C5 C14 C18
+    C31 C10 C20 C9 C17 C16 C29 C13
+    "Net-(RNRN1-Pad10)" "Net-(U5-Pad2)" /PREDONE'
+    (clearance_class "kicad_default")
+    (via_rule kicad_default)
+    (rule
+      (width 250.0)
+    )
+    (circuit 
+      (use_layer F.Cu B.Cu)
+    )
+  )
+)
