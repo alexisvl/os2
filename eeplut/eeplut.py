@@ -16,12 +16,31 @@
 # You should have received a copy of the GNU General Public License along with
 # this program. If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
+import datetime
+import enum
+import inspect
+import struct
+import sys
+
+SCRIPT=False
+
 try:
     import intelhex
 except ImportError:
     have_intelhex = False
 else:
     have_intelhex = True
+
+class Format(enum.Enum):
+    HEX = 1
+    BIN = 2
+    C_BYTE = 3
+    C_WORD = 4
+
+class Endian(enum.Enum):
+    LITTLE = 1
+    BIG = 2
 
 class Eeplut:
     """EEPLUT base class. To design a LUT, subclass this.
@@ -56,27 +75,27 @@ class Eeplut:
         self.address_space = address_space
         self.address_lines = (address_space - 1).bit_length()
 
-    def export(self, f, *, fmt, endianness=None):
+    def export(self, f, *, fmt: Format, endianness: Endian = None, **kwargs):
         """Export the LUT to a file.
 
         - f: file-like output
-        - fmt: format. Currently supported: "bin", "hex"
-        - endianness: mandatory if output bus is wider than 8. Can be "big" or
-          "little".
+        - fmt: output format
+        - endianness: mandatory if output bus is wider than 8
+        - kwargs: per-format extra arguments
         """
 
-        if fmt not in ("bin", "hex"):
-            raise Exception(f"unsupported format: {fmt!r}")
+        if not isinstance(fmt, Format):
+            raise TypeError("fmt must be a Format enum value")
 
-        if fmt == "hex":
+        if fmt == Format.HEX:
             if not have_intelhex:
-                raise Exception("intelhex module required for hex output")
+                _die("intelhex module required for hex output")
 
         logic_functions = self.logic_functions()
         inputs_map = self.inputs_map()
         outputs_map = self.outputs_map()
 
-        data = [0xFF] * self.address_space
+        data = [None] * self.address_space
 
         for addr in range(self.address_space):
             inputs = {}
@@ -86,32 +105,87 @@ class Eeplut:
                 )
 
             outputs = {
-                k: self.default_unused_output() for k in range(self.width_bits)
+                k: None for k in range(self.width_bits)
             }
             for fun in logic_functions:
-                # TODO: weak/strong and validation
                 fun_outputs = fun(inputs)
+                if fun_outputs is None:
+                    fun_outputs = {}
                 for k, v in fun_outputs.items():
                     kn = outputs_map.get(k, k)
                     if not isinstance(kn, int):
                         raise ValueError(f"Could not map output {k}")
-                    outputs[kn] = bool(v)
+
+                    if v in ("L", "H"):
+                        this_prio = 1
+                    else:
+                        this_prio = 2
+
+                    if outputs[kn] is None:
+                        last_prio = 0
+                    elif outputs[kn] in ("L", "H"):
+                        last_prio = 1
+                    else:
+                        last_prio = 2
+
+                    if this_prio > last_prio:
+                        outputs[kn] = v
+                    else:
+                        raise ValueError(
+                            f"Output {k} from function {fun.__name__}: "
+                            "too many drivers on this net"
+                        )
 
             data_value = 0
             for k, v in outputs.items():
-                if v:
+                if v == "L":
+                    v_bool = False
+                else:
+                    v_bool = bool(v)
+
+                if v_bool:
                     data_value |= (1 << k)
             data[addr] = data_value
 
-        # TODO: non-8-bit
+        stride = self.width_bits // 8
+        content = bytearray(self.address_space)
+        endian_flag = {
+            Endian.BIG: ">",
+            Endian.LITTLE: "<",
+            None: "<",
+        }[endianness]
 
-        if fmt == "bin":
-            f.write(bytes(data))
-        elif fmt == "hex":
+        struct_def = endian_flag + {
+            8: "B", 16: "H", 32: "I", 64: "Q",
+        }[self.width_bits]
+
+        for addr in range(self.address_space):
+            encoded = struct.pack(struct_def, data[addr])
+            content[addr * stride : (addr + 1) * stride] = encoded
+
+        if fmt == Format.BIN:
+            f.write(content)
+        elif fmt == Format.HEX:
             ih = intelhex.IntelHex()
-            for n, i in enumerate(data):
+            for n, i in enumerate(content):
                 ih[n] = i
             ih.write_hex_file(f)
+
+        elif fmt == Format.C_BYTE:
+            if kwargs.get('ident') is None:
+                _die("Format C_BYTE requires identifier (--ident)")
+
+            _write_c(f, content, "unsigned char", kwargs["ident"])
+
+        elif fmt == Format.C_WORD:
+            if kwargs.get('ident') is None:
+                _die("Format C_WORD requires identifier (--ident)")
+
+            ty = {
+                8: "uint8_t", 16: "uint16_t", 32: "uint32_t", 64: "uint64_t",
+            }[self.width_bits]
+
+            _write_c(f, data, ty, kwargs["ident"])
 
     def inputs_map(self):
         """Implementation may return a dict mapping input signals to names.
@@ -160,6 +234,112 @@ class Eeplut:
         """
         return True
 
+def _write_c(f, data, ty, ident):
+    """Write out a C resource file.
+
+    f: output file
+    data: data to write, must be an iterable of integers
+    ty: C type for array
+    ident: C identifier for array
+    """
+
+    f.write("// This file was autogenerated on ")
+    f.write(datetime.datetime.now().ctime())
+    f.write("\n\n")
+
+    f.write(f"const {ty} {ident}[] = {{\n")
+
+    for n, i in enumerate(data):
+        if n % 16 == 0:
+            if n != 0:
+                f.write("\n")
+            f.write("    ")
+
+        f.write(f"0x{i:X}u,")
+
+        if n % 16 < 15:
+            f.write(" ")
+
+    f.write("\n};\n")
+
+
+def _die(msg):
+    if SCRIPT:
+        print(f"{sys.argv[0]}: {msg}", file=sys.stderr)
+        sys.exit(1)
+    else:
+        raise Exception(msg)
+
+def _do_auto(instance):
+    name = type(instance).__name__
+
+    p = argparse.ArgumentParser(
+        description=f"Generate EEPROM LUT for {name}",
+    )
+
+    p.add_argument(
+        "file", type=str, help="Output filename",
+    )
+
+    p.add_argument(
+        "--format", "-f",
+        choices=("auto", "hex", "bin", "cbyte", "cword"),
+        default="auto",
+        help="Output format. auto = detect by extension",
+    )
+
+    p.add_argument(
+        "--endian", "-e",
+        choices=("little", "big"),
+        default="little",
+        help="Output endianness",
+    )
+
+    p.add_argument(
+        "--ident", type=str,
+        help="Identifier name, for formats cbyte and cword",
+    )
+
+    args = p.parse_args()
+
+    if args.format == "auto":
+        if args.file.endswith(".hex"):
+            fmt = Format.HEX
+        elif args.file.endswith(".bin"):
+            fmt = Format.BIN
+        else:
+            _die(
+                "Cannot guess format from file extension. "
+                "Try --format."
+            )
+    else:
+        fmt = {
+            "hex": Format.HEX,
+            "bin": Format.BIN,
+            "cbyte": Format.C_BYTE,
+            "cword": Format.C_WORD,
+        }[args.format]
+
+    mode = {
+        Format.HEX: "w",
+        Format.BIN: "wb",
+        Format.C_BYTE: "w",
+        Format.C_WORD: "w",
+    }[fmt]
+
+    endian = {
+        "little": Endian.LITTLE,
+        "big": Endian.BIG,
+    }[args.endian]
+
+    with open(args.file, mode) as f:
+        instance.export(
+            f,
+            fmt=fmt,
+            endianness=endian,
+            ident=args.ident,
+        )
+
 def auto(classname, *args, **kwargs):
     """Call with the name of a class to run an automatic conversion if running
     from the root script.
@@ -169,15 +349,45 @@ def auto(classname, *args, **kwargs):
 
     args and kwargs are passed to the constructor.
 
-    Also works as a decorator.
+    Generally used as a decorator.
     """
 
-    # TODO: command line options
-
-    import inspect
     if inspect.stack()[1].function == "<module>":
-        instance = classname(*args, **kwargs)
-        with open("out.hex", "w") as f:
-            instance.export(f, fmt="hex")
+        global SCRIPT
+        SCRIPT=True
 
-    return instance
+        instance = classname(*args, **kwargs)
+        _do_auto(instance)
+        return instance
+    else:
+        return classname
+
+def concat(inputs, *keys):
+    """Concatenate inputs by key into an integer. Convenience function to
+    avoid long strings of bit shifts and ORs:
+
+    concat(inputs, "A", "B", "C") is equivalent to:
+    inputs["C"] | (inputs["B"] << 1) | (inputs["C"] << 2)
+    """
+
+    v = 0
+
+    for n, i in enumerate(keys):
+        v |= inputs[i] << (len(keys) - n - 1)
+
+    return v
+
+def decompose(value, *keys):
+    """Decompose an integer value into a dict of outputs by key.
+    Convenience function to avoid long sequences of mask and shift.
+
+    decompose(value, "A", "B", "C") is equivalent to:
+    {"A": (value & 0x4) >> 2, "B": (value & 0x2) >> 1, "C": value & 0x1}
+    """
+
+    outputs = {}
+
+    for n, i in enumerate(keys):
+        outputs[i] = 1 if (value & (1 << (len(keys) - n - 1))) else 0
+
+    return outputs

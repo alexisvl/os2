@@ -99,13 +99,13 @@ class FontRom(eeplut.Eeplut):
 
                     self.chars[i][arr_ind] = value
 
-            for y in range(CHAR_H):
-                for x in range(CHAR_W):
-                    arr_ind = (y * CHAR_W) + x
-                    val = self.chars[i][arr_ind]
-                    print(val if val else " ", end='')
-                print()
-            print()
+            #for y in range(CHAR_H):
+            #    for x in range(CHAR_W):
+            #        arr_ind = (y * CHAR_W) + x
+            #        val = self.chars[i][arr_ind]
+            #        print(val if val else " ", end='')
+            #    print()
+            #print()
 
     def logic_functions(self):
         return [self.fn_font]
@@ -137,17 +137,11 @@ class FontRom(eeplut.Eeplut):
         }
 
     def fn_font(self, inputs):
-        hdot = inputs["HDOT0"] | (inputs["HDOT1"] << 1) | (inputs["HDOT2"] << 2)
-        char = (
-            inputs["CHAR0"]
-            | (inputs["CHAR1"] << 1)
-            | (inputs["CHAR2"] << 2)
-            | (inputs["CHAR3"] << 3)
-            | (inputs["CHAR4"] << 4)
-            | (inputs["CHAR5"] << 5)
-            | (inputs["CHAR6"] << 6)
+        hdot = eeplut.concat(inputs, "HDOT2", "HDOT1", "HDOT0")
+        char = eeplut.concat(inputs,
+            "CHAR6", "CHAR5", "CHAR4", "CHAR3", "CHAR2", "CHAR1", "CHAR0",
         )
-        line = inputs["LINE0"] | (inputs["LINE1"] << 1) | (inputs["LINE2"] << 2)
+        line = eeplut.concat(inputs, "LINE2", "LINE1", "LINE0")
 
         arr_ind = (line * CHAR_W) + hdot
 

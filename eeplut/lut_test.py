@@ -16,8 +16,8 @@
 
 import eeplut
 
-@eeplut.auto
-class TestLut(eeplut.Eeplut):
+#@eeplut.auto
+class TestLut8(eeplut.Eeplut):
     def __init__(self):
         super().__init__(size_kbits = 512, width_bits = 8)
 
@@ -28,3 +28,81 @@ class TestLut(eeplut.Eeplut):
 
     def fn_test(self, inputs):
         return {i: inputs[i + 8] for i in range(8)}
+
+@eeplut.auto
+class TestLut16(eeplut.Eeplut):
+    def __init__(self):
+        super().__init__(size_kbits = 512, width_bits = 16)
+
+    def logic_functions(self):
+        return [
+            self.fn_test,
+        ]
+
+    def default_unused_output(self):
+        return False
+
+    def fn_test(self, inputs):
+        # inputs are 0 to 14
+
+        return inputs
+
+#@eeplut.auto
+class TestWeakStrong(eeplut.Eeplut):
+    # By using weak outputs to fill the EEPROM with 0x55 bytes,
+    # then strong outputs to override some, this demo layers weak
+    # and strong drivers into a pattern of 55, FF, 55, FF ...
+
+    def __init__(self):
+        super().__init__(size_kbits = 1, width_bits = 8)
+
+    def logic_functions(self):
+        return [
+            self.fn_weak,
+            self.fn_strong,
+        ]
+
+    def fn_weak(self, inputs):
+        return {i: "L" if i % 2 else "H" for i in range(8)}
+
+    def fn_strong(self, inputs):
+        if inputs[0]:
+            return {i: 1 for i in range(8)}
+
+#@eeplut.auto
+class TestWeakConflict(eeplut.Eeplut):
+    # Too many weak drivers
+
+    def __init__(self):
+        super().__init__(size_kbits = 1, width_bits = 8)
+
+    def logic_functions(self):
+        return [
+            self.fn1,
+            self.fn2,
+        ]
+
+    def fn1(self, inputs):
+        return {i: "L" for i in range(8)}
+
+    def fn2(self, inputs):
+        return {i: "H" for i in range(8)}
+
+#@eeplut.auto
+class TestStrongConflict(eeplut.Eeplut):
+    # Too many strong drivers
+
+    def __init__(self):
+        super().__init__(size_kbits = 1, width_bits = 8)
+
+    def logic_functions(self):
+        return [
+            self.fn1,
+            self.fn2,
+        ]
+
+    def fn1(self, inputs):
+        return {i: 0 for i in range(8)}
+
+    def fn2(self, inputs):
+        return {i: 1 for i in range(8)}
